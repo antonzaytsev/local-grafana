@@ -17,7 +17,7 @@ Build a local metrics monitoring system for a mini PC environment. Needs push-ba
 VictoriaMetrics (storage + query)
       │  PromQL
       ▼
-   Grafana (dashboards + alerting)
+   Grafana (dashboards)
 ```
 
 Host metrics collected by `node-exporter` → scraped by `vmagent`.
@@ -46,8 +46,9 @@ Host metrics collected by `node-exporter` → scraped by `vmagent`.
   - `POST /api/v1/import/prometheus` — Prometheus text format
   - `POST /api/v1/import` — JSON line format
   - `POST /write` — InfluxDB line protocol
-- Example curl snippets for each format
+- Example curl/code snippets for each format
 - Basic auth on vmagent push endpoints via nginx basic auth
+- Serve `docs/push-api.md` as static HTML via Grafana's built-in static file serving or a lightweight nginx container, accessible at `http://<host>/docs/push-api`
 
 ### Phase 3 — Dashboards
 - Provision base dashboards as JSON in `grafana/dashboards/`:
@@ -56,14 +57,7 @@ Host metrics collected by `node-exporter` → scraped by `vmagent`.
   - **Custom Metrics**: generic template dashboard with variable selectors (host, service)
 - Grafana variables for filtering by host/label
 
-### Phase 4 — Alerting
-- Grafana unified alerting (built-in, no Alertmanager needed):
-  - CPU > 90% sustained
-  - Service down (metric absent)
-  - Disk > 85%
-- Notification contact point: webhook (Telegram/Slack) configured via env var
-
-### Phase 5 — Data Retention Config
+### Phase 4 — Data Retention Config
 - VictoriaMetrics flags:
   - `-retentionPeriod=3d` for raw (or longer with downsampling)
   - Use VM's built-in downsampling (`-downsampling.period`) for long-term aggregates
@@ -86,8 +80,19 @@ grafana/
     host-overview.json
     services-status.json
     custom-metrics.json
-README.md              # push API usage, setup instructions
+docs/
+  push-api.md          # push API reference (served via HTTP)
+README.md              # setup instructions, links to docs
 ```
+
+---
+
+## Next Version
+
+- **Alerting**: Grafana unified alerting (built-in, no Alertmanager needed)
+  - Rules: CPU > 90% sustained, service down (metric absent), disk > 85%
+  - Notification contact point: webhook (Telegram/Slack) configured via env var
+- **Log aggregation**: Loki + Promtail for service/container logs alongside metrics
 
 ---
 
