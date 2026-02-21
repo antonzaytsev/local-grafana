@@ -1,0 +1,13 @@
+# Streaming aggregation — 1h rollups
+# Produces new metrics with naming: <metric_name>:1h_avg, :1h_max, :1h_min, :1h_last
+# Raw metrics are kept alongside (keepInput=true in docker-compose).
+# Only raw metrics are aggregated (excludes metrics that already contain a colon).
+
+- interval: 1h
+  match: '{__name__!~".+:.+"}'
+  outputs:
+    - avg
+    - max
+    - min
+    - last
+    - count_samples

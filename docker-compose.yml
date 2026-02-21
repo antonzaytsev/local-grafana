@@ -20,9 +20,12 @@ services:
       - "${VMAGENT_PORT:-8429}:8429"
     volumes:
       - ./vmagent/scrape.yml:/config/scrape.yml:ro
+      - ./vmagent/stream-aggregation.yml:/config/stream-aggregation.yml:ro
     command:
       - -promscrape.config=/config/scrape.yml
       - -remoteWrite.url=http://victoriametrics:8428/api/v1/write
+      - -remoteWrite.streamAggr.config=/config/stream-aggregation.yml
+      - -remoteWrite.streamAggr.keepInput=true
       - -httpListenAddr=:8429
     depends_on:
       - victoriametrics
