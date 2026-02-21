@@ -1,0 +1,63 @@
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.102.1
+    container_name: victoriametrics
+    restart: unless-stopped
+    ports:
+      - "${VM_PORT:-8428}:8428"
+    volumes:
+      - vm-data:/storage
+    command:
+      - -storageDataPath=/storage
+      - -retentionPeriod=${VM_RETENTION:-3d}
+      - -httpListenAddr=:8428
+
+  vmagent:
+    image: victoriametrics/vmagent:v1.102.1
+    container_name: vmagent
+    restart: unless-stopped
+    ports:
+      - "${VMAGENT_PORT:-8429}:8429"
+    volumes:
+      - ./vmagent/scrape.yml:/config/scrape.yml:ro
+    command:
+      - -promscrape.config=/config/scrape.yml
+      - -remoteWrite.url=http://victoriametrics:8428/api/v1/write
+      - -httpListenAddr=:8429
+    depends_on:
+      - victoriametrics
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_PORT:-8430}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - victoriametrics
+
+volumes:
+  vm-data:
+  grafana-data:
