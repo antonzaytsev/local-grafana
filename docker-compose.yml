@@ -55,6 +55,19 @@ services:
       - ./docs/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./docs:/usr/share/nginx/html:ro
 
+  keenetic-collector:
+    build: ./keenetic-collector
+    container_name: keenetic-collector
+    restart: unless-stopped
+    environment:
+      - KEENETIC_HOST=${KEENETIC_HOST:-192.168.1.1}
+      - KEENETIC_LOGIN=${KEENETIC_LOGIN:-admin}
+      - KEENETIC_PASSWORD=${KEENETIC_PASSWORD}
+      - VM_PUSH_URL=http://victoriametrics:8428/api/v1/import/prometheus
+      - COLLECT_INTERVAL=60
+    depends_on:
+      - victoriametrics
+
   grafana:
     image: grafana/grafana:11.3.0
     container_name: grafana
@@ -65,6 +78,7 @@ services:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/keenetic.json
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
