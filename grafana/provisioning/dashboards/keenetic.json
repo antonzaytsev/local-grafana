@@ -10,17 +10,10 @@
   "templating": {
     "list": [
       {
-        "name": "datasource",
-        "label": "Datasource",
-        "type": "datasource",
-        "pluginId": "prometheus",
-        "current": {}
-      },
-      {
         "name": "router",
         "label": "Router",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "datasource": { "type": "prometheus", "uid": "victoriametrics" },
         "query": "label_values(keenetic_uptime_seconds, router)",
         "refresh": 2,
         "multi": false,
@@ -35,7 +28,7 @@
       "title": "CPU Load",
       "type": "stat",
       "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"] },
         "colorMode": "background",
@@ -69,7 +62,7 @@
       "title": "Memory Used",
       "type": "stat",
       "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"] },
         "colorMode": "background",
@@ -102,7 +95,7 @@
       "title": "Memory",
       "type": "gauge",
       "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"] },
         "showThresholdLabels": false,
@@ -138,7 +131,7 @@
       "title": "Uptime",
       "type": "stat",
       "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"] },
         "colorMode": "value",
@@ -165,7 +158,7 @@
       "title": "CPU Load Over Time",
       "type": "timeseries",
       "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "options": {
         "tooltip": { "mode": "single" },
         "legend": { "displayMode": "list", "placement": "bottom" }
@@ -191,7 +184,7 @@
       "title": "Memory Over Time",
       "type": "timeseries",
       "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
       "options": {
         "tooltip": { "mode": "multi" },
         "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "max"] }
