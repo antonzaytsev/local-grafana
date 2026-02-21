@@ -4,12 +4,14 @@ VictoriaMetrics + Grafana + vmagent + node-exporter, deployed via Docker Compose
 
 ## Services
 
-| Service | URL | Purpose |
-|---------|-----|---------|
-| Grafana | http://localhost:8430 | Dashboards (admin / admin) |
-| VictoriaMetrics | http://localhost:8428 | Metrics storage + PromQL query |
-| vmagent | http://localhost:8429 | Push receiver + scraper |
-| Docs | http://localhost:8431/push-api.md | Push API reference |
+| Service | Description |
+|---------|-------------|
+| **grafana** | Dashboard UI — visualizes all metrics, home page shows Keenetic router |
+| **victoriametrics** | Time-series database — stores all metrics, exposes PromQL query API |
+| **vmagent** | Scrapes node-exporter, receives push metrics, forwards to VictoriaMetrics with 1h rollups |
+| **node-exporter** | Exposes host machine metrics (CPU, RAM, disk, network) for vmagent to scrape |
+| **keenetic-collector** | Ruby service — polls Keenetic router every 60s and pushes CPU/memory/uptime to VictoriaMetrics |
+| **docs** | Serves push API reference as plain text over HTTP |
 
 All ports are configurable via `.env` (see `.env.example`).
 
