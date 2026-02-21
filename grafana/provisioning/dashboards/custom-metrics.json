@@ -1,0 +1,158 @@
+{
+  "title": "Custom Metrics",
+  "uid": "custom-metrics",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "timezone": "browser",
+  "graphTooltip": 1,
+  "time": { "from": "now-3h", "to": "now" },
+  "description": "Generic dashboard for exploring custom pushed metrics. Use variables to filter by host and metric name.",
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Datasource",
+        "type": "datasource",
+        "pluginId": "prometheus",
+        "current": {}
+      },
+      {
+        "name": "host",
+        "label": "Host",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": "label_values(host)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {}
+      },
+      {
+        "name": "metric",
+        "label": "Metric",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": "metrics(.*)",
+        "refresh": 2,
+        "multi": false,
+        "includeAll": false,
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Current Value — $metric",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "{__name__=\"$metric\",host=~\"$host\"}",
+          "legendFormat": "{{host}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Min / Max / Avg — $metric",
+      "type": "stat",
+      "gridPos": { "x": 6, "y": 0, "w": 18, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "reduceOptions": { "calcs": ["min", "max", "mean"] },
+        "orientation": "horizontal",
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "{__name__=\"$metric\",host=~\"$host\"}",
+          "legendFormat": "{{host}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "$metric over time",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 10 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["last", "min", "max", "mean"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "fillOpacity": 8, "lineWidth": 2 }
+        }
+      },
+      "targets": [
+        {
+          "expr": "{__name__=\"$metric\",host=~\"$host\"}",
+          "legendFormat": "{{host}} {{instance}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "All Custom Metrics (last value)",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "sortBy": [{ "displayName": "Metric", "desc": false }]
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Value" },
+            "properties": [{ "id": "displayName", "value": "Last Value" }]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "{host=~\"$host\"}",
+          "legendFormat": "",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": { "Time": true },
+            "renameByName": { "__name__": "Metric", "host": "Host", "instance": "Instance", "job": "Job" }
+          }
+        }
+      ]
+    }
+  ]
+}
