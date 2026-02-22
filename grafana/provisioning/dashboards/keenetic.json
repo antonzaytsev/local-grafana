@@ -6,14 +6,20 @@
   "refresh": "1m",
   "timezone": "browser",
   "graphTooltip": 1,
-  "time": { "from": "now-3h", "to": "now" },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
   "templating": {
     "list": [
       {
         "name": "router",
         "label": "Router",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "victoriametrics"
+        },
         "query": "label_values(keenetic_uptime_seconds, router)",
         "refresh": 2,
         "multi": false,
@@ -24,8 +30,26 @@
         "name": "instance",
         "label": "Host",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "victoriametrics"
+        },
         "query": "label_values(node_uname_info, instance)",
+        "refresh": 2,
+        "multi": false,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {}
+      },
+      {
+        "name": "ha_host",
+        "label": "HA Host",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "victoriametrics"
+        },
+        "query": "label_values(ha_cpu_usage_percent, host)",
         "refresh": 2,
         "multi": false,
         "includeAll": true,
@@ -39,227 +63,498 @@
       "id": 100,
       "title": "Router",
       "type": "row",
-      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
       "collapsed": false
     },
     {
       "id": 1,
       "title": "CPU Load",
       "type": "stat",
-      "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "background",
         "graphMode": "area"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
-          "thresholds": { "mode": "absolute", "steps": [
-            { "color": "green", "value": null },
-            { "color": "yellow", "value": 60 },
-            { "color": "red", "value": 85 }
-          ]}
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
         }
       },
-      "targets": [{ "expr": "keenetic_cpu_load_percent{router=~\"$router\"}", "legendFormat": "CPU" }]
+      "targets": [
+        {
+          "expr": "keenetic_cpu_load_percent{router=~\"$router\"}",
+          "legendFormat": "CPU"
+        }
+      ]
     },
     {
       "id": 2,
       "title": "Memory Used",
       "type": "stat",
-      "gridPos": { "x": 6, "y": 1, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 6,
+        "y": 1,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "background",
         "graphMode": "area"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
-          "thresholds": { "mode": "absolute", "steps": [
-            { "color": "green", "value": null },
-            { "color": "yellow", "value": 70 },
-            { "color": "red", "value": 90 }
-          ]}
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
         }
       },
-      "targets": [{ "expr": "keenetic_memory_used_percent{router=~\"$router\"}", "legendFormat": "Memory" }]
+      "targets": [
+        {
+          "expr": "keenetic_memory_used_percent{router=~\"$router\"}",
+          "legendFormat": "Memory"
+        }
+      ]
     },
     {
       "id": 3,
       "title": "Memory",
       "type": "gauge",
-      "gridPos": { "x": 12, "y": 1, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 12,
+        "y": 1,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes", "min": 0,
-          "thresholds": { "mode": "percentage", "steps": [
-            { "color": "green", "value": null },
-            { "color": "yellow", "value": 70 },
-            { "color": "red", "value": 90 }
-          ]}
+          "unit": "bytes",
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
         }
       },
       "targets": [
-        { "expr": "keenetic_memory_used_bytes{router=~\"$router\"}", "legendFormat": "Used" },
-        { "expr": "keenetic_memory_total_bytes{router=~\"$router\"}", "legendFormat": "Total" }
+        {
+          "expr": "keenetic_memory_used_bytes{router=~\"$router\"}",
+          "legendFormat": "Used"
+        },
+        {
+          "expr": "keenetic_memory_total_bytes{router=~\"$router\"}",
+          "legendFormat": "Total"
+        }
       ]
     },
     {
       "id": 4,
       "title": "Uptime",
       "type": "stat",
-      "gridPos": { "x": 18, "y": 1, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 18,
+        "y": 1,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "value",
         "graphMode": "none"
       },
       "fieldConfig": {
         "defaults": {
           "unit": "dtdurations",
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }]}
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
         }
       },
-      "targets": [{ "expr": "keenetic_uptime_seconds{router=~\"$router\"}", "legendFormat": "Uptime" }]
+      "targets": [
+        {
+          "expr": "keenetic_uptime_seconds{router=~\"$router\"}",
+          "legendFormat": "Uptime"
+        }
+      ]
     },
     {
       "id": 5,
       "title": "CPU Load Over Time",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 5, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
-      "options": { "tooltip": { "mode": "single" } },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
-          "custom": { "fillOpacity": 15, "lineWidth": 2 },
-          "color": { "mode": "fixed", "fixedColor": "orange" }
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "tooltip": {
+          "mode": "single"
         }
       },
-      "targets": [{ "expr": "keenetic_cpu_load_percent{router=~\"$router\"}", "legendFormat": "CPU %" }]
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "fillOpacity": 15,
+            "lineWidth": 2
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "keenetic_cpu_load_percent{router=~\"$router\"}",
+          "legendFormat": "CPU %"
+        }
+      ]
     },
     {
       "id": 6,
       "title": "Memory Over Time",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 5, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
-      "options": { "tooltip": { "mode": "multi" } },
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes", "min": 0,
-          "custom": { "fillOpacity": 10, "lineWidth": 2 }
+          "unit": "bytes",
+          "min": 0,
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
         }
       },
       "targets": [
-        { "expr": "keenetic_memory_used_bytes{router=~\"$router\"}", "legendFormat": "Used" },
-        { "expr": "keenetic_memory_total_bytes{router=~\"$router\"}", "legendFormat": "Total" }
+        {
+          "expr": "keenetic_memory_used_bytes{router=~\"$router\"}",
+          "legendFormat": "Used"
+        },
+        {
+          "expr": "keenetic_memory_total_bytes{router=~\"$router\"}",
+          "legendFormat": "Total"
+        }
       ]
     },
     {
       "id": 200,
       "title": "Host",
       "type": "row",
-      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 1 },
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 24,
+        "h": 1
+      },
       "collapsed": false
     },
     {
       "id": 10,
       "title": "CPU Usage",
       "type": "stat",
-      "gridPos": { "x": 0, "y": 14, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "background",
         "graphMode": "area"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
-          "thresholds": { "mode": "absolute", "steps": [
-            { "color": "green", "value": null },
-            { "color": "yellow", "value": 70 },
-            { "color": "red", "value": 90 }
-          ]}
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
         }
       },
-      "targets": [{
-        "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$instance\"}[$__rate_interval])) * 100)",
-        "legendFormat": "{{instance}}"
-      }]
+      "targets": [
+        {
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$instance\"}[$__rate_interval])) * 100)",
+          "legendFormat": "{{instance}}"
+        }
+      ]
     },
     {
       "id": 11,
       "title": "Memory Usage",
       "type": "stat",
-      "gridPos": { "x": 6, "y": 14, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 6,
+        "y": 14,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "background",
         "graphMode": "area"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
-          "thresholds": { "mode": "absolute", "steps": [
-            { "color": "green", "value": null },
-            { "color": "yellow", "value": 75 },
-            { "color": "red", "value": 90 }
-          ]}
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
         }
       },
-      "targets": [{
-        "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"})) * 100",
-        "legendFormat": "{{instance}}"
-      }]
+      "targets": [
+        {
+          "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"})) * 100",
+          "legendFormat": "{{instance}}"
+        }
+      ]
     },
     {
       "id": 12,
       "title": "Disk Usage (/)",
       "type": "stat",
-      "gridPos": { "x": 12, "y": 14, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "background",
         "graphMode": "area"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
-          "thresholds": { "mode": "absolute", "steps": [
-            { "color": "green", "value": null },
-            { "color": "yellow", "value": 70 },
-            { "color": "red", "value": 85 }
-          ]}
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
         }
       },
-      "targets": [{
-        "expr": "(1 - node_filesystem_avail_bytes{instance=~\"$instance\",mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{instance=~\"$instance\",mountpoint=\"/\",fstype!=\"tmpfs\"}) * 100",
-        "legendFormat": "{{instance}}"
-      }]
+      "targets": [
+        {
+          "expr": "(1 - node_filesystem_avail_bytes{instance=~\"$instance\",mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{instance=~\"$instance\",mountpoint=\"/\",fstype!=\"tmpfs\"}) * 100",
+          "legendFormat": "{{instance}}"
+        }
+      ]
     },
     {
       "id": 13,
       "title": "Network I/O",
       "type": "stat",
-      "gridPos": { "x": 18, "y": 14, "w": 6, "h": 4 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 18,
+        "y": 14,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "colorMode": "background",
         "graphMode": "area",
         "orientation": "horizontal"
@@ -267,17 +562,25 @@
       "fieldConfig": {
         "defaults": {
           "unit": "Bps",
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }]}
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
         }
       },
       "targets": [
         {
           "expr": "sum by (instance) (rate(node_network_receive_bytes_total{instance=~\"$instance\",device!=\"lo\"}[$__rate_interval]))",
-          "legendFormat": "↓ {{instance}}"
+          "legendFormat": "\u2193 {{instance}}"
         },
         {
           "expr": "sum by (instance) (rate(node_network_transmit_bytes_total{instance=~\"$instance\",device!=\"lo\"}[$__rate_interval]))",
-          "legendFormat": "↑ {{instance}}"
+          "legendFormat": "\u2191 {{instance}}"
         }
       ]
     },
@@ -285,31 +588,64 @@
       "id": 14,
       "title": "CPU Usage Over Time",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
-      "options": { "tooltip": { "mode": "multi" } },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
-          "custom": { "fillOpacity": 10 }
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
         }
       },
-      "targets": [{
-        "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$instance\"}[$__rate_interval])) * 100)",
-        "legendFormat": "{{instance}}"
-      }]
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "fillOpacity": 10
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$instance\"}[$__rate_interval])) * 100)",
+          "legendFormat": "{{instance}}"
+        }
+      ]
     },
     {
       "id": 15,
       "title": "Memory Usage Over Time",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
-      "options": { "tooltip": { "mode": "multi" } },
+      "gridPos": {
+        "x": 12,
+        "y": 18,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "bytes", "min": 0,
-          "custom": { "fillOpacity": 10 }
+          "unit": "bytes",
+          "min": 0,
+          "custom": {
+            "fillOpacity": 10
+          }
         }
       },
       "targets": [
@@ -327,23 +663,37 @@
       "id": 16,
       "title": "Network Traffic",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 26, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
-      "options": { "tooltip": { "mode": "multi" } },
+      "gridPos": {
+        "x": 0,
+        "y": 26,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "Bps",
-          "custom": { "fillOpacity": 10 }
+          "custom": {
+            "fillOpacity": 10
+          }
         }
       },
       "targets": [
         {
           "expr": "rate(node_network_receive_bytes_total{instance=~\"$instance\",device!=\"lo\"}[$__rate_interval])",
-          "legendFormat": "↓ {{device}}"
+          "legendFormat": "\u2193 {{device}}"
         },
         {
           "expr": "rate(node_network_transmit_bytes_total{instance=~\"$instance\",device!=\"lo\"}[$__rate_interval])",
-          "legendFormat": "↑ {{device}}"
+          "legendFormat": "\u2191 {{device}}"
         }
       ]
     },
@@ -351,27 +701,362 @@
       "id": 17,
       "title": "Disk Space",
       "type": "bargauge",
-      "gridPos": { "x": 12, "y": 26, "w": 12, "h": 8 },
-      "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+      "gridPos": {
+        "x": 12,
+        "y": 26,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
       "options": {
         "orientation": "horizontal",
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
         "displayMode": "gradient"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
-          "thresholds": { "mode": "absolute", "steps": [
-            { "color": "green", "value": null },
-            { "color": "yellow", "value": 70 },
-            { "color": "red", "value": 85 }
-          ]}
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
         }
       },
-      "targets": [{
-        "expr": "(1 - node_filesystem_avail_bytes{instance=~\"$instance\",fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{instance=~\"$instance\",fstype!~\"tmpfs|overlay\"}) * 100",
-        "legendFormat": "{{mountpoint}}"
-      }]
+      "targets": [
+        {
+          "expr": "(1 - node_filesystem_avail_bytes{instance=~\"$instance\",fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{instance=~\"$instance\",fstype!~\"tmpfs|overlay\"}) * 100",
+          "legendFormat": "{{mountpoint}}"
+        }
+      ]
+    },
+    {
+      "id": 300,
+      "title": "Home Assistant",
+      "type": "row",
+      "gridPos": {
+        "x": 0,
+        "y": 34,
+        "w": 24,
+        "h": 1
+      },
+      "collapsed": false
+    },
+    {
+      "id": 20,
+      "title": "CPU Usage",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "ha_cpu_usage_percent{host=~\"$ha_host\"}",
+          "legendFormat": "{{host}}"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Memory Used",
+      "type": "stat",
+      "gridPos": {
+        "x": 6,
+        "y": 35,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "ha_memory_used_percent{host=~\"$ha_host\"}",
+          "legendFormat": "{{host}}"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Disk Usage (/)",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 35,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "ha_disk_used_percent{host=~\"$ha_host\"}",
+          "legendFormat": "{{host}}"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Load Average",
+      "type": "stat",
+      "gridPos": {
+        "x": 18,
+        "y": 35,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "horizontal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "ha_load_average_1m{host=~\"$ha_host\"}",
+          "legendFormat": "1m"
+        },
+        {
+          "expr": "ha_load_average_5m{host=~\"$ha_host\"}",
+          "legendFormat": "5m"
+        },
+        {
+          "expr": "ha_load_average_15m{host=~\"$ha_host\"}",
+          "legendFormat": "15m"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "CPU Over Time",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 39,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "fillOpacity": 15,
+            "lineWidth": 2
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "ha_cpu_usage_percent{host=~\"$ha_host\"}",
+          "legendFormat": "{{host}}"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "title": "Memory Over Time",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 39,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "victoriametrics"
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "min": 0,
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "ha_memory_used_bytes{host=~\"$ha_host\"}",
+          "legendFormat": "Used"
+        },
+        {
+          "expr": "ha_memory_total_bytes{host=~\"$ha_host\"}",
+          "legendFormat": "Total"
+        }
+      ]
     }
   ]
 }
