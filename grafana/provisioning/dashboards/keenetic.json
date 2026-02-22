@@ -164,7 +164,6 @@
       },
       "targets": [
         { "expr": "keenetic_memory_used_bytes{router=~\"$router\"}", "legendFormat": "Used" },
-        { "expr": "keenetic_memory_free_bytes{router=~\"$router\"}", "legendFormat": "Free" },
         { "expr": "keenetic_memory_total_bytes{router=~\"$router\"}", "legendFormat": "Total" }
       ]
     },
