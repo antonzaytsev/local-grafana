@@ -308,14 +308,20 @@
       "options": { "tooltip": { "mode": "multi" } },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent", "min": 0, "max": 100,
+          "unit": "bytes", "min": 0,
           "custom": { "fillOpacity": 10 }
         }
       },
-      "targets": [{
-        "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"})) * 100",
-        "legendFormat": "{{instance}}"
-      }]
+      "targets": [
+        {
+          "expr": "node_memory_MemTotal_bytes{instance=~\"$instance\"} - node_memory_MemAvailable_bytes{instance=~\"$instance\"}",
+          "legendFormat": "Used"
+        },
+        {
+          "expr": "node_memory_MemTotal_bytes{instance=~\"$instance\"}",
+          "legendFormat": "Total"
+        }
+      ]
     },
     {
       "id": 16,
