@@ -130,6 +130,38 @@ curl "http://localhost:8428/api/v1/query_range?query=my_service_requests_total&s
 
 ---
 
+## Deleting Data
+
+VictoriaMetrics supports deleting time series by selector. Use sparingly — deletion can impact performance. Data also expires automatically per `VM_RETENTION`. Base URL: `http://<host>:8428` (VictoriaMetrics, not vmagent). Use `VM_PORT` from `.env` if you changed the default.
+
+**Endpoint:** `POST /api/v1/admin/tsdb/delete_series`
+
+**Parameters:** `match[]` — Prometheus time series selector (required). Optional: `start`, `end` (Unix seconds) to limit the time range.
+
+```bash
+# Delete all series matching a metric name
+curl -s -X POST 'http://localhost:8428/api/v1/admin/tsdb/delete_series' \
+  -d 'match[]=my_service_requests_total'
+
+# Delete all metrics with a name prefix (regex)
+curl -s -X POST 'http://localhost:8428/api/v1/admin/tsdb/delete_series' \
+  -d 'match[]={__name__=~"my_prefix_.*"}'
+
+# Delete with time range (optional)
+curl -s -X POST 'http://localhost:8428/api/v1/admin/tsdb/delete_series' \
+  -d 'match[]=my_metric' \
+  -d 'start=1700000000' \
+  -d 'end=1700086400'
+```
+
+To free disk space after deletion, trigger a merge (single-node):
+
+```bash
+curl -X POST http://localhost:8428/internal/force_merge
+```
+
+---
+
 ## Metric Naming Conventions
 
 - Use `snake_case`
