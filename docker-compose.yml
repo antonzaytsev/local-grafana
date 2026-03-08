@@ -68,6 +68,21 @@ services:
     depends_on:
       - victoriametrics
 
+  disk-collector:
+    build: ./disk-collector
+    container_name: disk-collector
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /dev:/dev:ro
+      - /sys:/sys:ro
+    environment:
+      - VM_PUSH_URL=http://victoriametrics:8428/api/v1/import/prometheus
+      - COLLECT_INTERVAL=${DISK_COLLECT_INTERVAL:-300}
+      - DISK_HOST=${DISK_HOST:-localhost}
+    depends_on:
+      - victoriametrics
+
   grafana:
     image: grafana/grafana:11.3.0
     container_name: grafana
