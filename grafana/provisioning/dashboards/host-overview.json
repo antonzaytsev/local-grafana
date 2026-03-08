@@ -89,7 +89,7 @@
     {
       "id": 2,
       "title": "Memory Usage",
-      "type": "stat",
+      "type": "bargauge",
       "gridPos": {
         "x": 6,
         "y": 0,
@@ -101,13 +101,14 @@
         "uid": "victoriametrics"
       },
       "options": {
+        "orientation": "vertical",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ]
         },
-        "colorMode": "background",
-        "graphMode": "area"
+        "displayMode": "gradient",
+        "showUnfilledArea": true
       },
       "fieldConfig": {
         "defaults": {
