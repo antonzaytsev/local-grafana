@@ -11,7 +11,7 @@ VictoriaMetrics + Grafana + vmagent + node-exporter, deployed via Docker Compose
 | **vmagent** | Scrapes node-exporter, receives push metrics, forwards to VictoriaMetrics with 1h rollups |
 | **node-exporter** | Exposes host machine metrics (CPU, RAM, disk, network) for vmagent to scrape |
 | **keenetic-collector** | Ruby service — polls Keenetic router every 60s and pushes CPU/memory/uptime to VictoriaMetrics |
-| **disk-collector** | Python service — polls local disk SMART data (temperature, health, reallocated sectors, etc.) every 5 min and pushes to VictoriaMetrics |
+| **disk-collector** | Go service — polls local disk SMART data (temperature, health, reallocated sectors, etc.) every 5 min and pushes to VictoriaMetrics |
 | **docs** | Serves push API reference as plain text over HTTP |
 
 All ports are configurable via `.env` (see `.env.example`).
