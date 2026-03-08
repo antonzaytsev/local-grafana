@@ -25,6 +25,7 @@ COLLECT_INTERVAL = int(os.environ.get("COLLECT_INTERVAL", "300"))  # 5 min defau
 HOST = os.environ.get("DISK_HOST", "localhost")
 
 # ATA SMART attribute IDs we care about (id -> metric suffix)
+# 194/190 (temp) excluded — handled separately, raw.value is 48-bit packed
 ATA_ATTR_IDS = {
     5: "reallocated_sectors",
     9: "power_on_hours",
@@ -32,8 +33,6 @@ ATA_ATTR_IDS = {
     188: "command_timeout",
     197: "pending_sectors",
     198: "offline_uncorrectable",
-    194: "temperature_celsius",
-    190: "airflow_temperature",
 }
 
 
@@ -108,46 +107,42 @@ def extract_metrics(device, data):
             break
     yield ("disk_smart_health_status", health, labels)
 
-    # Temperature — multiple possible locations
-    temp = None
+    # Temperature — use string_value only; raw.value is 48-bit packed (wrong)
+    def _parse_temp(val):
+        if val is None:
+            return None
+        try:
+            n = int(float(str(val).split()[0]))
+            return n if 0 <= n <= 100 else None
+        except (ValueError, TypeError):
+            return None
+
+    temp_val = None
     if "temperature" in data and isinstance(data["temperature"], dict):
-        temp = data["temperature"].get("current")
-    if temp is None and "temperature" in data:
-        temp = data["temperature"]
-    if temp is None:
+        temp_val = _parse_temp(data["temperature"].get("current"))
+    if temp_val is None and "temperature" in data:
+        temp_val = _parse_temp(data["temperature"])
+    if temp_val is None:
         nvme = data.get("nvme_smart_health_information_log", {})
         if isinstance(nvme, dict):
-            temp = nvme.get("temperature")
-    if temp is None:
+            temp_val = _parse_temp(nvme.get("temperature"))
+    if temp_val is None:
         ata = data.get("ata_smart_attributes", {})
         if isinstance(ata, dict):
-            tbl = ata.get("table") or []
-            for attr in tbl:
-                if isinstance(attr, dict):
-                    aid = attr.get("id")
-                    name_attr = attr.get("name", "")
-                    if aid == 194 or "Temperature" in name_attr or "temperature" in name_attr.lower():
-                        raw = attr.get("raw", {})
-                        if isinstance(raw, dict):
-                            # Prefer string_value: raw.value is 48-bit packed, wrong for temp
-                            sv = raw.get("string_value") or raw.get("string", "")
-                            if sv:
-                                temp = str(sv).split()[0]  # "34" or "34 (Min/Max 9/47)"
-                            else:
-                                v = raw.get("value")
-                                # Only use value if in sane temp range (0-100°C)
-                                if isinstance(v, (int, float)) and 0 <= v <= 100:
-                                    temp = v
-                        elif isinstance(raw, (int, float)) and 0 <= raw <= 100:
-                            temp = raw
-                        break
-    if temp is not None:
-        try:
-            temp_val = int(float(str(temp).split()[0]))
-            if 0 <= temp_val <= 100:  # Sanity check
-                yield ("disk_smart_temperature_celsius", temp_val, labels)
-        except (ValueError, TypeError):
-            pass
+            for attr in ata.get("table") or []:
+                if not isinstance(attr, dict):
+                    continue
+                aid = attr.get("id")
+                name_attr = attr.get("name", "")
+                if aid == 194 or "Temperature" in name_attr or "temperature" in name_attr.lower():
+                    raw = attr.get("raw", {})
+                    if isinstance(raw, dict):
+                        sv = raw.get("string_value") or raw.get("string", "")
+                        if sv:
+                            temp_val = _parse_temp(str(sv).split()[0])
+                            break
+    if temp_val is not None:
+        yield ("disk_smart_temperature_celsius", temp_val, labels)
 
     # ATA SMART attributes — prefer string_value; raw.value is 48-bit packed
     ata = data.get("ata_smart_attributes", {})
@@ -174,9 +169,6 @@ def extract_metrics(device, data):
             val = "0"
         try:
             num = int(float(str(val).split()[0]))
-            # Sanity: temperature 0–100, power_on_hours < 1e7, sectors < 1e9
-            if ATA_ATTR_IDS[aid] == "temperature_celsius" and not (0 <= num <= 100):
-                continue
             if ATA_ATTR_IDS[aid] == "power_on_hours" and not (0 <= num < 1e7):
                 continue
             metric_name = f"disk_smart_{ATA_ATTR_IDS[aid]}"
