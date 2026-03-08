@@ -7,11 +7,19 @@ Discovers disks from /sys/block, runs smartctl, parses JSON, pushes Prometheus m
 import json
 import logging
 import os
+import signal
 import subprocess
 import sys
 import time
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
+
+SHUTDOWN = False
+
+
+def _on_signal(signum, frame):
+    global SHUTDOWN
+    SHUTDOWN = True
 
 logging.basicConfig(
     level=logging.INFO,
@@ -231,6 +239,8 @@ def collect_and_push():
 
     all_metrics = []
     for device in disks:
+        if SHUTDOWN:
+            return
         data = get_smartctl_json(device)
         if data:
             for m in extract_metrics(device, data):
@@ -247,16 +257,28 @@ def collect_and_push():
         LOG.warning("push returned non-204")
 
 
-def main():
-    LOG.info("starting — collect every %ds, host=%s", COLLECT_INTERVAL, HOST)
-    time.sleep(5)
+def interruptible_sleep(seconds):
+    """Sleep in 1s chunks so we can exit quickly on SIGTERM."""
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline and not SHUTDOWN:
+        time.sleep(min(1.0, max(0, deadline - time.monotonic())))
 
-    while True:
+
+def main():
+    signal.signal(signal.SIGTERM, _on_signal)
+    signal.signal(signal.SIGINT, _on_signal)
+
+    LOG.info("starting — collect every %ds, host=%s", COLLECT_INTERVAL, HOST)
+    interruptible_sleep(2)  # Brief delay for VictoriaMetrics to be ready
+
+    while not SHUTDOWN:
         try:
             collect_and_push()
         except Exception as e:
             LOG.exception("collect error: %s", e)
-        time.sleep(COLLECT_INTERVAL)
+        interruptible_sleep(COLLECT_INTERVAL)
+
+    LOG.info("shutting down")
 
 
 if __name__ == "__main__":
