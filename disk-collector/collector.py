@@ -143,6 +143,8 @@ def extract_metrics(device, data):
                             break
     if temp_val is not None:
         yield ("disk_smart_temperature_celsius", temp_val, labels)
+    else:
+        LOG.debug("%s: no valid temperature (0-100°C) from any source", device)
 
     # ATA SMART attributes — prefer string_value; raw.value is 48-bit packed
     ata = data.get("ata_smart_attributes", {})
