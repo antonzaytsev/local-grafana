@@ -98,6 +98,36 @@ def extract_metrics(device, data):
     model = data.get("model_name") or data.get("serial_number") or "unknown"
     labels["model"] = escape_label(model[:64])
 
+    # Disk capacity (bytes)
+    capacity_bytes = None
+    uc = data.get("user_capacity")
+    if isinstance(uc, dict) and "bytes" in uc:
+        try:
+            capacity_bytes = int(uc["bytes"])
+        except (ValueError, TypeError):
+            pass
+    if capacity_bytes is None and "nvme_namespaces" in data:
+        nvme_ns = data.get("nvme_namespaces")
+        if isinstance(nvme_ns, list) and nvme_ns:
+            for ns in nvme_ns:
+                if not isinstance(ns, dict):
+                    continue
+                try:
+                    nsze = int(ns.get("nsze") or ns.get("ncapacity") or 0)
+                    lbaf_list = ns.get("lbaf", [])
+                    lbas = 512  # default
+                    if isinstance(lbaf_list, list) and lbaf_list:
+                        lbaf = lbaf_list[0]
+                        if isinstance(lbaf, dict) and "lba_size" in lbaf:
+                            lbas = int(lbaf.get("lba_size", 512))
+                    if nsze > 0:
+                        capacity_bytes = lbas * nsze
+                        break
+                except (ValueError, TypeError):
+                    continue
+    if capacity_bytes is not None and capacity_bytes > 0:
+        yield ("disk_smart_capacity_bytes", capacity_bytes, labels)
+
     # Health status: 1=passed, 0=failed
     health = 0
     for key in ("smart_status", "smartctl", "scsi_health_status"):
