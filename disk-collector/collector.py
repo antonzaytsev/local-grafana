@@ -92,6 +92,22 @@ def escape_label(val):
     return s[:255]  # reasonable limit
 
 
+def get_disk_size_from_sys(device):
+    """Read disk size in bytes from /sys/block/<name>/size (512-byte sectors)."""
+    if not device.startswith("/dev/"):
+        return None
+    name = device.replace("/dev/", "")
+    path = f"/sys/block/{name}/size"
+    try:
+        if os.path.exists(path):
+            with open(path) as f:
+                sectors = int(f.read().strip())
+            return sectors * 512 if sectors > 0 else None
+    except (ValueError, OSError):
+        pass
+    return None
+
+
 def extract_metrics(device, data):
     """Extract disk_smart_* metrics from smartctl JSON. Yields (name, value, labels)."""
     labels = {"disk": device, "host": HOST}
@@ -125,6 +141,18 @@ def extract_metrics(device, data):
                         break
                 except (ValueError, TypeError):
                     continue
+    # SCSI: try scsi_user_data_blocks * scsi_logical_block_length
+    if capacity_bytes is None:
+        try:
+            blocks = int(data.get("scsi_user_data_blocks") or 0)
+            blen = int(data.get("scsi_logical_block_length") or 512)
+            if blocks > 0 and blen > 0:
+                capacity_bytes = blocks * blen
+        except (ValueError, TypeError):
+            pass
+    # Fallback: read from /sys/block (always available on Linux)
+    if capacity_bytes is None or capacity_bytes <= 0:
+        capacity_bytes = get_disk_size_from_sys(device)
     if capacity_bytes is not None and capacity_bytes > 0:
         yield ("disk_smart_capacity_bytes", capacity_bytes, labels)
 
