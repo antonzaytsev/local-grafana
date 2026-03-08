@@ -1,0 +1,133 @@
+{
+  "title": "Home",
+  "uid": "home",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "timezone": "browser",
+  "graphTooltip": 1,
+  "time": {"from": "now-3h", "to": "now"},
+  "templating": {
+    "list": [
+      {"name": "router", "type": "query", "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "query": "label_values(keenetic_uptime_seconds, router)", "refresh": 2, "multi": false, "current": {}},
+      {"name": "instance", "type": "query", "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "query": "label_values(node_uname_info, instance)", "refresh": 2, "multi": false, "includeAll": true, "allValue": ".*", "current": {}},
+      {"name": "ha_host", "type": "query", "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "query": "label_values(ha_cpu_usage_percent, host)", "refresh": 2, "multi": false, "includeAll": true, "allValue": ".*", "current": {}}
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "",
+      "type": "text",
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 2},
+      "options": {"content": "## [Keenetic Router](/d/keenetic-router)\nRouter metrics", "mode": "markdown"},
+      "transparent": true
+    },
+    {
+      "id": 2,
+      "title": "CPU",
+      "type": "stat",
+      "gridPos": {"x": 0, "y": 2, "w": 2, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}]}}},
+      "targets": [{"expr": "keenetic_cpu_load_percent{router=~\"$router\"}", "legendFormat": "CPU"}]
+    },
+    {
+      "id": 3,
+      "title": "Memory",
+      "type": "stat",
+      "gridPos": {"x": 2, "y": 2, "w": 2, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}]}}},
+      "targets": [{"expr": "keenetic_memory_used_percent{router=~\"$router\"}", "legendFormat": "Mem"}]
+    },
+    {
+      "id": 4,
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": {"x": 4, "y": 2, "w": 4, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "value", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "dtdurations", "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}},
+      "targets": [{"expr": "keenetic_uptime_seconds{router=~\"$router\"}", "legendFormat": "Uptime"}]
+    },
+    {
+      "id": 10,
+      "title": "",
+      "type": "text",
+      "gridPos": {"x": 8, "y": 0, "w": 8, "h": 2},
+      "options": {"content": "## [Homelab Host](/d/homelab)\nCPU, memory, disk, network, SMART", "mode": "markdown"},
+      "transparent": true
+    },
+    {
+      "id": 11,
+      "title": "CPU",
+      "type": "stat",
+      "gridPos": {"x": 8, "y": 2, "w": 2, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}]}}},
+      "targets": [{"expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$instance\"}[$__rate_interval])) * 100)", "legendFormat": "CPU"}]
+    },
+    {
+      "id": 12,
+      "title": "Memory",
+      "type": "stat",
+      "gridPos": {"x": 10, "y": 2, "w": 2, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 75}]}}},
+      "targets": [{"expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"})) * 100", "legendFormat": "Mem"}]
+    },
+    {
+      "id": 13,
+      "title": "Disk /",
+      "type": "stat",
+      "gridPos": {"x": 12, "y": 2, "w": 2, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}]}}},
+      "targets": [{"expr": "(1 - node_filesystem_avail_bytes{instance=~\"$instance\",mountpoint=\"/\",fstype!=\"tmpfs\"} / node_filesystem_size_bytes{instance=~\"$instance\",mountpoint=\"/\",fstype!=\"tmpfs\"}) * 100", "legendFormat": "Disk"}]
+    },
+    {
+      "id": 20,
+      "title": "",
+      "type": "text",
+      "gridPos": {"x": 16, "y": 0, "w": 8, "h": 2},
+      "options": {"content": "## [Home Assistant](/d/homeassistant)\nHA host metrics", "mode": "markdown"},
+      "transparent": true
+    },
+    {
+      "id": 21,
+      "title": "CPU",
+      "type": "stat",
+      "gridPos": {"x": 16, "y": 2, "w": 2, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}]}}},
+      "targets": [{"expr": "ha_cpu_usage_percent{host=~\"$ha_host\"}", "legendFormat": "CPU"}]
+    },
+    {
+      "id": 22,
+      "title": "Memory",
+      "type": "stat",
+      "gridPos": {"x": 18, "y": 2, "w": 2, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 75}]}}},
+      "targets": [{"expr": "ha_memory_used_percent{host=~\"$ha_host\"}", "legendFormat": "Mem"}]
+    },
+    {
+      "id": 23,
+      "title": "Disk /",
+      "type": "stat",
+      "gridPos": {"x": 20, "y": 2, "w": 2, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}]}}},
+      "targets": [{"expr": "ha_disk_used_percent{host=~\"$ha_host\"}", "legendFormat": "Disk"}]
+    }
+  ]
+}

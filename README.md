@@ -90,10 +90,12 @@ docker compose restart victoriametrics
 
 ## Dashboards
 
-Three pre-provisioned dashboards in Grafana:
+Pre-provisioned dashboards (one per source):
 
-- **Host Overview** — CPU, RAM, disk, network time series and stats
-- **Server Disks** — SMART data per disk: temperature, health status, reallocated/pending sectors, power-on hours, NVMe wear
+- **Home** — brief overview: Keenetic, Homelab, Home Assistant
+- **Keenetic Router** — router CPU, memory, uptime
+- **Homelab Host** — node-exporter (CPU, RAM, disk, network) + disk SMART (temperature, health, sectors)
+- **Home Assistant** — HA host CPU, memory, disk, load
 - **Services Status** — up/down per scrape target, availability %, table
 - **Custom Metrics** — generic explorer: filter by host and metric name
 

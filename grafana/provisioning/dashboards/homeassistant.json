@@ -1,0 +1,37 @@
+{
+  "title": "Home Assistant",
+  "uid": "homeassistant",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "timezone": "browser",
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "ha_host",
+        "label": "Host",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+        "query": "label_values(ha_cpu_usage_percent, host)",
+        "refresh": 2,
+        "multi": false,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {"id": 1, "title": "CPU Usage", "type": "stat", "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}, "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "area"}, "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 90}]}}}, "targets": [{"expr": "ha_cpu_usage_percent{host=~\"$ha_host\"}", "legendFormat": "{{host}}"}]},
+    {"id": 2, "title": "Memory Used", "type": "stat", "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}, "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "area"}, "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 75}, {"color": "red", "value": 90}]}}}, "targets": [{"expr": "ha_memory_used_percent{host=~\"$ha_host\"}", "legendFormat": "{{host}}"}]},
+    {"id": 3, "title": "Disk Usage (/)", "type": "stat", "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4}, "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "area"}, "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}, {"color": "red", "value": 85}]}}}, "targets": [{"expr": "ha_disk_used_percent{host=~\"$ha_host\"}", "legendFormat": "{{host}}"}]},
+    {"id": 4, "title": "Load Average", "type": "stat", "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}, "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "value", "graphMode": "area", "orientation": "horizontal"}, "fieldConfig": {"defaults": {"thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}}, "targets": [{"expr": "ha_load_average_1m{host=~\"$ha_host\"}", "legendFormat": "1m"}, {"expr": "ha_load_average_5m{host=~\"$ha_host\"}", "legendFormat": "5m"}, {"expr": "ha_load_average_15m{host=~\"$ha_host\"}", "legendFormat": "15m"}]},
+    {"id": 5, "title": "CPU Over Time", "type": "timeseries", "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8}, "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "options": {"tooltip": {"mode": "multi"}}, "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100, "custom": {"fillOpacity": 15, "lineWidth": 2}, "color": {"mode": "fixed", "fixedColor": "purple"}}}, "targets": [{"expr": "ha_cpu_usage_percent{host=~\"$ha_host\"}", "legendFormat": "{{host}}"}]},
+    {"id": 6, "title": "Memory Over Time", "type": "timeseries", "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8}, "datasource": {"type": "prometheus", "uid": "victoriametrics"}, "options": {"tooltip": {"mode": "multi"}}, "fieldConfig": {"defaults": {"unit": "bytes", "custom": {"fillOpacity": 10, "lineWidth": 2}}}, "targets": [{"expr": "ha_memory_used_bytes{host=~\"$ha_host\"}", "legendFormat": "Used"}, {"expr": "ha_memory_total_bytes{host=~\"$ha_host\"}", "legendFormat": "Total"}]}
+  ]
+}

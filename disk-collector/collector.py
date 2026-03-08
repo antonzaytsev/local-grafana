@@ -129,18 +129,27 @@ def extract_metrics(device, data):
                     if aid == 194 or "Temperature" in name_attr or "temperature" in name_attr.lower():
                         raw = attr.get("raw", {})
                         if isinstance(raw, dict):
-                            temp = raw.get("value") or raw.get("string_value")
-                        elif isinstance(raw, (int, float)):
+                            # Prefer string_value: raw.value is 48-bit packed, wrong for temp
+                            sv = raw.get("string_value") or raw.get("string", "")
+                            if sv:
+                                temp = str(sv).split()[0]  # "34" or "34 (Min/Max 9/47)"
+                            else:
+                                v = raw.get("value")
+                                # Only use value if in sane temp range (0-100°C)
+                                if isinstance(v, (int, float)) and 0 <= v <= 100:
+                                    temp = v
+                        elif isinstance(raw, (int, float)) and 0 <= raw <= 100:
                             temp = raw
                         break
     if temp is not None:
         try:
-            temp_val = int(float(temp))
-            yield ("disk_smart_temperature_celsius", temp_val, labels)
+            temp_val = int(float(str(temp).split()[0]))
+            if 0 <= temp_val <= 100:  # Sanity check
+                yield ("disk_smart_temperature_celsius", temp_val, labels)
         except (ValueError, TypeError):
             pass
 
-    # ATA SMART attributes
+    # ATA SMART attributes — prefer string_value; raw.value is 48-bit packed
     ata = data.get("ata_smart_attributes", {})
     tbl = ata.get("table") or []
     for attr in tbl:
@@ -150,14 +159,26 @@ def extract_metrics(device, data):
         if aid not in ATA_ATTR_IDS:
             continue
         raw = attr.get("raw", {})
+        val = None
         if isinstance(raw, dict):
-            val = raw.get("value")
-            if val is None:
-                val = raw.get("string_value", "0")
-        else:
+            sv = raw.get("string_value") or raw.get("string", "")
+            if sv:
+                val = str(sv).split()[0]
+            else:
+                v = raw.get("value")
+                if v is not None:
+                    val = v
+        elif isinstance(raw, (int, float)):
             val = raw
+        if val is None:
+            val = "0"
         try:
-            num = int(float(str(val).split()[0]))  # "42" or "42 (raw)" -> 42
+            num = int(float(str(val).split()[0]))
+            # Sanity: temperature 0–100, power_on_hours < 1e7, sectors < 1e9
+            if ATA_ATTR_IDS[aid] == "temperature_celsius" and not (0 <= num <= 100):
+                continue
+            if ATA_ATTR_IDS[aid] == "power_on_hours" and not (0 <= num < 1e7):
+                continue
             metric_name = f"disk_smart_{ATA_ATTR_IDS[aid]}"
             yield (metric_name, num, labels)
         except (ValueError, TypeError):
@@ -169,7 +190,9 @@ def extract_metrics(device, data):
         poh = nvme.get("power_on_hours")
         if poh is not None:
             try:
-                yield ("disk_smart_power_on_hours", int(poh), labels)
+                poh_val = int(poh)
+                if 0 <= poh_val < 1e7:  # Sanity: < ~1141 years
+                    yield ("disk_smart_power_on_hours", poh_val, labels)
             except (ValueError, TypeError):
                 pass
         pct = nvme.get("percentage_used")
