@@ -228,15 +228,6 @@
         }
       },
       "targets": [{"expr": "avg_over_time(up[$__range])", "legendFormat": "{{job}}"}]
-    },
-
-    {
-      "id": 50,
-      "title": "",
-      "type": "text",
-      "gridPos": {"x": 0, "y": 25, "w": 24, "h": 2},
-      "options": {"content": "## [Keenetic (Combined View)](/d/keenetic)\nRouter + Host + Home Assistant in one dashboard", "mode": "markdown"},
-      "transparent": true
     }
   ]
 }
