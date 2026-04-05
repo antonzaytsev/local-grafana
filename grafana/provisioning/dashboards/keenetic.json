@@ -1,5 +1,5 @@
 {
-  "title": "Home",
+  "title": "Keenetic",
   "uid": "keenetic",
   "schemaVersion": 39,
   "version": 1,
@@ -577,11 +577,11 @@
       "targets": [
         {
           "expr": "sum by (instance) (rate(node_network_receive_bytes_total{instance=~\"$instance\",device!=\"lo\"}[$__rate_interval]))",
-          "legendFormat": "\u2193 {{instance}}"
+          "legendFormat": "↓ {{instance}}"
         },
         {
           "expr": "sum by (instance) (rate(node_network_transmit_bytes_total{instance=~\"$instance\",device!=\"lo\"}[$__rate_interval]))",
-          "legendFormat": "\u2191 {{instance}}"
+          "legendFormat": "↑ {{instance}}"
         }
       ]
     },
@@ -690,11 +690,11 @@
       "targets": [
         {
           "expr": "rate(node_network_receive_bytes_total{instance=~\"$instance\",device!=\"lo\"}[$__rate_interval])",
-          "legendFormat": "\u2193 {{device}}"
+          "legendFormat": "↓ {{device}}"
         },
         {
           "expr": "rate(node_network_transmit_bytes_total{instance=~\"$instance\",device!=\"lo\"}[$__rate_interval])",
-          "legendFormat": "\u2191 {{device}}"
+          "legendFormat": "↑ {{device}}"
         }
       ]
     },

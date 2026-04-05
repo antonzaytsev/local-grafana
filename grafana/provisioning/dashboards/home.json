@@ -128,6 +128,37 @@
       "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"},
       "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 70}]}}},
       "targets": [{"expr": "ha_disk_used_percent{host=~\"$ha_host\"}", "legendFormat": "Disk"}]
+    },
+
+    {
+      "id": 30,
+      "title": "",
+      "type": "text",
+      "gridPos": {"x": 0, "y": 5, "w": 8, "h": 2},
+      "options": {"content": "## [Claude Code](/d/claude-code)\nAI usage and cost tracking", "mode": "markdown"},
+      "transparent": true
+    },
+    {
+      "id": 31,
+      "title": "Today",
+      "type": "stat",
+      "gridPos": {"x": 0, "y": 7, "w": 4, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 10}, {"color": "red", "value": 50}]}}},
+      "targets": [{"expr": "sum(claude_cost_usd > 0)", "legendFormat": "Cost"}],
+      "timeFrom": "now/d"
+    },
+    {
+      "id": 32,
+      "title": "This Week",
+      "type": "stat",
+      "gridPos": {"x": 4, "y": 7, "w": 4, "h": 3},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 50}, {"color": "red", "value": 300}]}}},
+      "targets": [{"expr": "sum(claude_cost_usd > 0)", "legendFormat": "Cost"}],
+      "timeFrom": "now/w"
     }
   ]
 }

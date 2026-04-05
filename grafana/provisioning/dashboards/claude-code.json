@@ -1,0 +1,211 @@
+{
+  "title": "Claude Code Usage",
+  "uid": "claude-code",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5m",
+  "timezone": "browser",
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "project",
+        "label": "Project",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+        "query": "label_values(claude_cost_usd, project)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "current": {"text": "All", "value": "$__all"}
+      },
+      {
+        "name": "model",
+        "label": "Model",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+        "query": "label_values(claude_cost_usd, model)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "current": {"text": "All", "value": "$__all"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 100,
+      "title": "",
+      "type": "row",
+      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 1},
+      "collapsed": false,
+      "panels": []
+    },
+
+    {
+      "id": 1,
+      "title": "Today's Cost",
+      "type": "stat",
+      "gridPos": {"x": 0, "y": 1, "w": 4, "h": 4},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "colorMode": "background", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 10}, {"color": "orange", "value": 25}, {"color": "red", "value": 50}]}}},
+      "targets": [{"expr": "sum(claude_cost_usd{project=~\"$project\", model=~\"$model\"} > 0)", "legendFormat": "Cost", "instant": false, "range": true}],
+      "timeFrom": "now/d"
+    },
+
+    {
+      "id": 2,
+      "title": "This Week's Cost",
+      "type": "stat",
+      "gridPos": {"x": 4, "y": 1, "w": 4, "h": 4},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "colorMode": "background", "graphMode": "area"},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 50}, {"color": "orange", "value": 150}, {"color": "red", "value": 300}]}}},
+      "targets": [{"expr": "sum(claude_cost_usd{project=~\"$project\", model=~\"$model\"} > 0)", "legendFormat": "Cost"}],
+      "timeFrom": "now/w"
+    },
+
+    {
+      "id": 3,
+      "title": "Today's Output Tokens",
+      "type": "stat",
+      "gridPos": {"x": 8, "y": 1, "w": 4, "h": 4},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "colorMode": "value", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}},
+      "targets": [{"expr": "sum(claude_output_tokens{project=~\"$project\", model=~\"$model\"} > 0)", "legendFormat": "Tokens"}],
+      "timeFrom": "now/d"
+    },
+
+    {
+      "id": 4,
+      "title": "Today's Input Tokens",
+      "type": "stat",
+      "gridPos": {"x": 12, "y": 1, "w": 4, "h": 4},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "colorMode": "value", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "purple", "value": null}]}}},
+      "targets": [{"expr": "sum(claude_input_tokens{project=~\"$project\", model=~\"$model\"} > 0)", "legendFormat": "Tokens"}],
+      "timeFrom": "now/d"
+    },
+
+    {
+      "id": 5,
+      "title": "Cache Hit Rate (today)",
+      "type": "gauge",
+      "gridPos": {"x": 16, "y": 1, "w": 4, "h": 4},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "showThresholdLabels": false, "showThresholdMarkers": true, "orientation": "auto"},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1, "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.3}, {"color": "green", "value": 0.6}]}}},
+      "targets": [{"expr": "sum(claude_cache_read_tokens{project=~\"$project\", model=~\"$model\"}) / (sum(claude_cache_read_tokens{project=~\"$project\", model=~\"$model\"}) + sum(claude_cache_write_tokens{project=~\"$project\", model=~\"$model\"}) + sum(claude_input_tokens{project=~\"$project\", model=~\"$model\"}))", "legendFormat": "Cache Hit"}],
+      "timeFrom": "now/d"
+    },
+
+    {
+      "id": 6,
+      "title": "Sessions Today",
+      "type": "stat",
+      "gridPos": {"x": 20, "y": 1, "w": 4, "h": 4},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "value", "graphMode": "none"},
+      "fieldConfig": {"defaults": {"unit": "short", "decimals": 0, "thresholds": {"mode": "absolute", "steps": [{"color": "blue", "value": null}]}}},
+      "targets": [{"expr": "count(count(claude_cost_usd{project=~\"$project\", model=~\"$model\"}) by (session))", "legendFormat": "Sessions"}],
+      "timeFrom": "now/d"
+    },
+
+    {
+      "id": 10,
+      "title": "Cost Over Time",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 5, "w": 16, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"tooltip": {"mode": "multi", "sort": "desc"}, "legend": {"displayMode": "table", "placement": "right", "calcs": ["sum"]}},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2, "custom": {"fillOpacity": 30, "lineWidth": 2, "stacking": {"mode": "normal"}, "spanNulls": false, "drawStyle": "bars", "barAlignment": 0}}},
+      "targets": [{"expr": "sum(claude_cost_usd{project=~\"$project\", model=~\"$model\"} > 0) by (project)", "legendFormat": "{{project}}"}],
+      "interval": "1h"
+    },
+
+    {
+      "id": 11,
+      "title": "Cost by Project",
+      "type": "piechart",
+      "gridPos": {"x": 16, "y": 5, "w": 8, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]}, "pieType": "donut", "tooltip": {"mode": "single"}},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2}},
+      "targets": [{"expr": "sum(claude_cost_usd{project=~\"$project\", model=~\"$model\"} > 0) by (project)", "legendFormat": "{{project}}"}]
+    },
+
+    {
+      "id": 20,
+      "title": "Output Tokens Over Time",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 13, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"tooltip": {"mode": "multi", "sort": "desc"}, "legend": {"displayMode": "table", "placement": "right", "calcs": ["sum"]}},
+      "fieldConfig": {"defaults": {"unit": "short", "custom": {"fillOpacity": 20, "lineWidth": 2, "stacking": {"mode": "normal"}, "spanNulls": false, "drawStyle": "bars"}}},
+      "targets": [
+        {"expr": "sum(claude_output_tokens{project=~\"$project\", model=~\"$model\"} > 0) by (model)", "legendFormat": "output — {{model}}"},
+        {"expr": "sum(claude_input_tokens{project=~\"$project\", model=~\"$model\"} > 0) by (model)", "legendFormat": "input — {{model}}"}
+      ],
+      "interval": "1h"
+    },
+
+    {
+      "id": 21,
+      "title": "Cache Tokens Over Time",
+      "type": "timeseries",
+      "gridPos": {"x": 12, "y": 13, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"tooltip": {"mode": "multi", "sort": "desc"}, "legend": {"displayMode": "table", "placement": "right", "calcs": ["sum"]}},
+      "fieldConfig": {"defaults": {"unit": "short", "custom": {"fillOpacity": 20, "lineWidth": 2, "spanNulls": false, "drawStyle": "bars"}, "color": {"mode": "palette-classic"}}, "overrides": [{"matcher": {"id": "byRegexp", "options": "write.*"}, "properties": [{"id": "color", "value": {"fixedColor": "orange", "mode": "fixed"}}]}, {"matcher": {"id": "byRegexp", "options": "read.*"}, "properties": [{"id": "color", "value": {"fixedColor": "green", "mode": "fixed"}}]}]},
+      "targets": [
+        {"expr": "sum(claude_cache_write_tokens{project=~\"$project\", model=~\"$model\"} > 0) by (model)", "legendFormat": "write — {{model}}"},
+        {"expr": "sum(claude_cache_read_tokens{project=~\"$project\", model=~\"$model\"} > 0) by (model)", "legendFormat": "read — {{model}}"}
+      ],
+      "interval": "1h"
+    },
+
+    {
+      "id": 30,
+      "title": "Cost by Model",
+      "type": "piechart",
+      "gridPos": {"x": 0, "y": 21, "w": 8, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]}, "pieType": "donut", "tooltip": {"mode": "single"}},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2}},
+      "targets": [{"expr": "sum(claude_cost_usd{project=~\"$project\", model=~\"$model\"} > 0) by (model)", "legendFormat": "{{model}}"}]
+    },
+
+    {
+      "id": 31,
+      "title": "Daily Cost Breakdown",
+      "type": "table",
+      "gridPos": {"x": 8, "y": 21, "w": 16, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"showHeader": true, "sortBy": [{"displayName": "Time", "desc": true}]},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2}, "overrides": [{"matcher": {"id": "byName", "options": "Time"}, "properties": [{"id": "custom.width", "value": 150}]}]},
+      "transformations": [
+        {"id": "reduce", "options": {"reducers": ["sum"], "includeTimeField": true}}
+      ],
+      "targets": [{"expr": "sum(claude_cost_usd{project=~\"$project\", model=~\"$model\"} > 0) by (project)", "legendFormat": "{{project}}", "format": "table", "instant": false}],
+      "interval": "1d"
+    },
+
+    {
+      "id": 40,
+      "title": "Cost per Session (top 20)",
+      "type": "bargauge",
+      "gridPos": {"x": 0, "y": 29, "w": 24, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "victoriametrics"},
+      "options": {"reduceOptions": {"calcs": ["sum"]}, "displayMode": "gradient", "orientation": "horizontal", "showUnfilled": true},
+      "fieldConfig": {"defaults": {"unit": "currencyUSD", "decimals": 2, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 2}, {"color": "orange", "value": 5}, {"color": "red", "value": 10}]}}},
+      "targets": [{"expr": "topk(20, sum(claude_cost_usd{project=~\"$project\", model=~\"$model\"} > 0) by (project, session))", "legendFormat": "{{project}} / {{session}}"}]
+    }
+  ]
+}
