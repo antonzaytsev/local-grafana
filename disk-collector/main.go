@@ -94,11 +94,20 @@ func getSmartctlJSON(ctx context.Context, device string) (map[string]interface{}
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "smartctl", "-a", "-j", device)
+	cmd := exec.CommandContext(ctx, "smartctl", "-n", "standby", "-a", "-j", device)
 	out, err := cmd.Output()
 	if err != nil {
 		if ctx.Err() != nil {
 			return nil, ctx.Err()
+		}
+		var state struct {
+			PowerMode struct {
+				Name string `json:"name"`
+			} `json:"power_mode"`
+		}
+		if json.Unmarshal(out, &state) == nil && (state.PowerMode.Name == "STANDBY" || state.PowerMode.Name == "SLEEP") {
+			log.Printf("%s is in %s; skipping SMART check", device, state.PowerMode.Name)
+			return nil, nil
 		}
 		return nil, err
 	}
@@ -458,6 +467,9 @@ func collectAndPush(ctx context.Context) {
 					return
 				}
 				log.Printf("smartctl %s: %v", device, err)
+				return
+			}
+			if data == nil {
 				return
 			}
 			ms := extractMetrics(device, data)
